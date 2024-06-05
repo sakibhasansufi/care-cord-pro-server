@@ -54,6 +54,9 @@ async function run() {
         })
 
 
+        
+
+
         // join camp
         app.post('/joincamp',async(req,res)=>{
             const join = req.body;
