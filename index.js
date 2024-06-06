@@ -64,6 +64,13 @@ async function run() {
 
 
         //join
+        app.get('/join',async(req,res)=>{
+            const result = await joinCampCollection.find().toArray();
+            res.send(result);
+
+        })
+
+
         app.post('/join',async(req,res)=>{
             const join = req.body;
             const result = await joinCollection.insertOne(join);
