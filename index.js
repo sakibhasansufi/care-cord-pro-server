@@ -30,6 +30,7 @@ async function run() {
 
         const campCollection = client.db("medical").collection("camp")
         const joinCampCollection = client.db("medical").collection("joincamp")
+        const joinCollection = client.db("medical").collection("join")
 
         //camp
         app.get('/camp',async(req,res)=>{
@@ -54,14 +55,20 @@ async function run() {
         })
 
 
-        
-
-
         // join camp
         app.post('/joincamp',async(req,res)=>{
-            const join = req.body;
-            const result = await joinCampCollection.insertOne(join);
+            const joinCamp = req.body;
+            const result = await joinCampCollection.insertOne(joinCamp);
             res.send(result);
+        })
+
+
+        //join
+        app.post('/join',async(req,res)=>{
+            const join = req.body;
+            const result = await joinCollection.insertOne(join);
+            res.send(result);
+
         })
 
 
