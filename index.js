@@ -37,37 +37,47 @@ async function run() {
 
         // user related
 
-        app.post('/users',async(req,res)=>{
+        app.get('/users',async(req,res)=>{
+            const result = await usersCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.post('/users', async (req, res) => {
             const users = req.body;
+            const query = { email: users.email };
+            const existingUser = await usersCollection.findOne(query);
+            if (existingUser) {
+                return res.send({ message: "user already exist", insertedId: null })
+            }
             const result = await usersCollection.insertOne(users);
             res.send(result);
         })
 
         //camp
-        app.get('/camp',async(req,res)=>{
+        app.get('/camp', async (req, res) => {
             const result = await campCollection.find().toArray();
             res.send(result);
         })
 
 
-        app.post('/camp',async(req,res)=>{
+        app.post('/camp', async (req, res) => {
             const data = req.body;
             const result = await campCollection.insertOne(data);
             res.send(result);
         })
 
 
-        app.get('/camp/:id',async (req,res)=>{
+        app.get('/camp/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id : new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const result = await campCollection.findOne(query);
             res.send(result)
-            
+
         })
 
 
         // join camp
-        app.post('/joincamp',async(req,res)=>{
+        app.post('/joincamp', async (req, res) => {
             const joinCamp = req.body;
             const result = await joinCampCollection.insertOne(joinCamp);
             res.send(result);
@@ -75,16 +85,16 @@ async function run() {
 
 
         //join
-        app.get('/join',async(req,res)=>{
+        app.get('/join', async (req, res) => {
             const email = req.query.email;
-            const query = {email:email};
+            const query = { email: email };
             const result = await joinCampCollection.find(query).toArray();
             res.send(result);
 
         })
 
 
-        app.post('/join',async(req,res)=>{
+        app.post('/join', async (req, res) => {
             const join = req.body;
             const result = await joinCollection.insertOne(join);
             res.send(result);
