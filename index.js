@@ -31,6 +31,17 @@ async function run() {
         const campCollection = client.db("medical").collection("camp")
         const joinCampCollection = client.db("medical").collection("joincamp")
         const joinCollection = client.db("medical").collection("join")
+        const usersCollection = client.db("medical").collection("users")
+
+
+
+        // user related
+
+        app.post('/users',async(req,res)=>{
+            const users = req.body;
+            const result = await usersCollection.insertOne(users);
+            res.send(result);
+        })
 
         //camp
         app.get('/camp',async(req,res)=>{
@@ -65,7 +76,9 @@ async function run() {
 
         //join
         app.get('/join',async(req,res)=>{
-            const result = await joinCampCollection.find().toArray();
+            const email = req.query.email;
+            const query = {email:email};
+            const result = await joinCampCollection.find(query).toArray();
             res.send(result);
 
         })
