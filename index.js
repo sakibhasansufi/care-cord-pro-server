@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
@@ -35,10 +36,30 @@ async function run() {
 
 
 
+
+        // jwt related api
+        app.post('/jwt',async(req,res)=>{
+            const user = req.body;
+            const token = jwt.sign()
+        })
+
         // user related
 
         app.get('/users',async(req,res)=>{
             const result = await usersCollection.find().toArray();
+            res.send(result);
+        })
+
+
+        app.patch('/users/admin/:id',async(req,res)=>{
+            const id =req.params.id;
+            const filter = {_id : new ObjectId(id)};
+            const updatedDoc ={
+                $set:{
+                    role : 'admin'
+                }
+            }
+            const result = await usersCollection.updateOne(filter,updatedDoc);
             res.send(result);
         })
 
@@ -77,6 +98,10 @@ async function run() {
 
 
         // join camp
+        app.get('/joincamp', async (req, res) => {
+            const result = await joinCampCollection.find().toArray();
+            res.send(result);
+        })
         app.post('/joincamp', async (req, res) => {
             const joinCamp = req.body;
             const result = await joinCampCollection.insertOne(joinCamp);
