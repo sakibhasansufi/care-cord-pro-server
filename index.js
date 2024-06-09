@@ -38,6 +38,7 @@ async function run() {
         const joinCampCollection = client.db("medical").collection("joincamp")
         const joinCollection = client.db("medical").collection("join")
         const usersCollection = client.db("medical").collection("users")
+        const adminAddCollection = client.db("medical").collection("campAdd")
 
 
 
@@ -69,61 +70,73 @@ async function run() {
         }
 
         // use verify admin after verify token
-        const verifyAdmin = async (req, res, next) => {
+        const verifyAdmin = async(req,res,next) =>{
             const email = req.decoded.email;
-            const query = { email: email };
+            const query = {email : email};
             const user = await usersCollection.findOne(query);
             const isAdmin = user?.role === 'admin';
-            if (!isAdmin) {
-                return res.status(403).send({ message: 'forbidden access' })
+            if(!isAdmin){
+                return res.status(403).send({message : 'forbidden access'});
             }
             next();
-
         }
+        
 
-        // users related
+
         app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
             const result = await usersCollection.find().toArray();
             res.send(result);
-        })
+          });
+
 
 
         app.get('/users/admin/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
+      
             if (email !== req.decoded.email) {
-                return res.status(403).send({ message: 'forbidden access' })
+              return res.status(403).send({ message: 'forbidden access' })
             }
+      
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             let admin = false;
             if (user) {
-                admin = user?.role === 'admin';
+              admin = user?.role === 'admin';
             }
-            res.send({ admin })
-        })
+            res.send({ admin });
+          })
+
+
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            // insert email if user doesnt exists: 
+            // you can do this many ways (1. email unique, 2. upsert 3. simple checking)
+            const query = { email: user.email }
+            const existingUser = await usersCollection.findOne(query);
+            if (existingUser) {
+              return res.send({ message: 'user already exists', insertedId: null })
+            }
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
+          });
+
+
+        
+
+
 
         app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
             const updatedDoc = {
-                $set: {
-                    role: 'admin'
-                }
+              $set: {
+                role: 'admin'
+              }
             }
             const result = await usersCollection.updateOne(filter, updatedDoc);
             res.send(result);
-        })
-
-        app.post('/users', async (req, res) => {
-            const users = req.body;
-            const query = { email: users.email };
-            const existingUser = await usersCollection.findOne(query);
-            if (existingUser) {
-                return res.send({ message: "user already exist", insertedId: null })
-            }
-            const result = await usersCollection.insertOne(users);
-            res.send(result);
-        })
+          })
 
 
 
@@ -176,6 +189,22 @@ async function run() {
         app.post('/join', async (req, res) => {
             const join = req.body;
             const result = await joinCollection.insertOne(join);
+            res.send(result);
+
+        })
+
+
+
+        // admin add data api 
+
+        app.get('/campAdd',async(req,res)=>{
+            const result = await adminAddCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.post('/campAdd',verifyToken, verifyAdmin, async(req,res)=>{
+            const camp = req.body;
+            const result = await adminAddCollection.insertOne(camp);
             res.send(result);
 
         })
