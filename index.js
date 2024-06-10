@@ -202,6 +202,16 @@ async function run() {
             res.send(result);
         })
 
+
+        app.get('/campAdd/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id : new ObjectId(id)};
+            const result = await adminAddCollection.findOne(query);
+            res.send(result);
+        })
+
+
+
         app.post('/campAdd', verifyToken, verifyAdmin, async (req, res) => {
             const camp = req.body;
             const result = await adminAddCollection.insertOne(camp);
